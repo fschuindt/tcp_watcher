@@ -1,0 +1,16 @@
+[Unit]
+Description=TCP Watcher Notification Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/tcp_watcher
+ExecStart=/bin/bash -c 'source /opt/tcp_watcher/.env && exec ./tcp_watch.sh "Minecraft, 25565, 43200" "Tibia, 7171, 7200"'
+Restart=on-failure
+RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tcp_watcher
+
+[Install]
+WantedBy=multi-user.target
