@@ -21,7 +21,6 @@ for entry in "$@"; do
   port_filters+=("tcp dst port $port")
 done
 
-# Build final tcpdump expression with ORs between filters
 tcpdump_expr=""
 for i in "${!port_filters[@]}"; do
   if [ "$i" -gt 0 ]; then
@@ -30,15 +29,10 @@ for i in "${!port_filters[@]}"; do
   tcpdump_expr+="${port_filters[$i]}"
 done
 
-# Final filter string with TCP SYN but not ACK
 full_filter="(${tcpdump_expr}) and tcp[13] & 2 != 0 and tcp[13] & 16 == 0"
 
-# Debug output (optional)
-# echo "tcpdump filter: $full_filter"
-
-# Run tcpdump using eval to expand the expression properly
 sudo tcpdump -l -n "$full_filter" | while read -r line; do
-  ip=$(echo "$line" | awk '{print $5}' | cut -d. -f1-4)
+  ip=$(echo "$line" | awk '{print $3}' | rev | cut -d'.' -f2- | rev)
   port=$(echo "$line" | awk '{print $5}' | awk -F. '{print $NF}' | cut -d':' -f1)
 
   now=$(date +%s)
